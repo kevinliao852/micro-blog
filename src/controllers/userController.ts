@@ -1,28 +1,20 @@
-import { Response, Request } from 'express';
-import { User } from '../models/user';
-import { hash } from 'bcrypt';
+import { Response, Request } from "express";
+import { User } from "../models/user";
+import { hash } from "bcrypt";
 
-interface userCreateData {
-  email: string;
-  password: string;
-}
+export const register = async (req: Request, res: Response) => {
+  const { email, password }: User = req.body;
 
-export const create = async (
-  req: Request<{}, {}, userCreateData>,
-  res: Response
-) => {
-  const { email, password }: userCreateData = req.body;
+  await User.insert({
+    email,
+    password: await hash(password, 12),
+  });
 
-  try {
-    await User.insert({
-      email,
-      password: await hash(password, 12),
-    });
-  } catch (err) {
-    console.log(err);
-  }
-  res.send({ status: 'ok' });
+  res.send({ status: "ok" });
 };
+
+export const login = async (req: Request, res: Response) => {};
+
 export const remove = async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await User.getRepository().delete(id);
@@ -30,9 +22,10 @@ export const remove = async (req: Request, res: Response) => {
   console.log(result);
   res.send({
     isDeleted:
-      affected && typeof affected === 'number' && affected > 0 ? true : false,
+      affected && typeof affected === "number" && affected > 0 ? true : false,
   });
 };
+
 export const update = async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = await User.getRepository().findOne(id);
@@ -42,10 +35,12 @@ export const update = async (req: Request, res: Response) => {
     res.send(result);
   }
 };
+
 export const getUsers = async (req: Request, res: Response) => {
   const users = await User.getRepository().find();
   res.send(users);
 };
+
 export const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
   console.log(id);
