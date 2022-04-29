@@ -1,6 +1,7 @@
 import { Response, Request } from "express";
 import { User } from "../models/user";
 import { hash } from "bcrypt";
+import { generateAccessToken } from "../utils/jwt";
 
 export const register = async (req: Request, res: Response) => {
   const { email, password }: User = req.body;
@@ -13,7 +14,20 @@ export const register = async (req: Request, res: Response) => {
   res.send({ status: "ok" });
 };
 
-export const login = async (req: Request, res: Response) => {};
+export const login = async (req: Request, res: Response) => {
+  const { email }: User = req.body;
+
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    return res.status(401).send("Login failed.");
+  }
+
+  const jwt = generateAccessToken({ email });
+  const response = { jwt };
+
+  return res.status(200).send(response);
+};
 
 export const remove = async (req: Request, res: Response) => {
   const { id } = req.params;
